@@ -1,0 +1,64 @@
+@model SubmitProposalViewModel
+@{ ViewData["Title"] = "Submit Proposal"; }
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="mb-3">
+            <a asp-action="Dashboard" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+            </a>
+        </div>
+        <div class="card">
+            <div class="card-header bw-dark">
+                <i class="bi bi-file-earmark-plus me-2"></i>Submit Project Proposal
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-info py-2 mb-4">
+                    <i class="bi bi-eye-slash me-2"></i>
+                    <small><strong>Blind Review:</strong> Your identity will be hidden from supervisors during initial review.</small>
+                </div>
+
+                <form asp-action="Submit" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label">Project Title</label>
+                        <input asp-for="Title" class="form-control" placeholder="A clear, descriptive title for your project" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ResearchAreaId" class="form-label">Research Area</label>
+                        <select asp-for="ResearchAreaId" class="form-select"
+                                asp-items="@(new SelectList(Model.ResearchAreas, "Id", "Name"))">
+                            <option value="">— Select Research Area —</option>
+                        </select>
+                        <span asp-validation-for="ResearchAreaId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="TechnicalStack" class="form-label">Technical Stack</label>
+                        <input asp-for="TechnicalStack" class="form-control"
+                               placeholder="e.g., ASP.NET Core, React, SQL Server" />
+                        <span asp-validation-for="TechnicalStack" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Abstract" class="form-label">Abstract</label>
+                        <textarea asp-for="Abstract" class="form-control" rows="6"
+                                  placeholder="Describe your project idea, objectives, and expected outcomes…"></textarea>
+                        <span asp-validation-for="Abstract" class="text-danger"></span>
+                        <div class="form-text">Be specific about your research goals and methodology.</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send me-2"></i>Submit Proposal
+                        </button>
+                        <a asp-action="Dashboard" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

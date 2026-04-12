@@ -1,0 +1,94 @@
+@model StudentDashboardViewModel
+@{ ViewData["Title"] = "Student Dashboard"; }
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="page-title"><i class="bi bi-mortarboard-fill me-2" style="opacity:.4"></i>My Proposals</h1>
+        <p class="page-subtitle">Submit and track your project proposals</p>
+    </div>
+    <a asp-action="Submit" class="btn btn-primary">
+        <i class="bi bi-plus me-1"></i>New Proposal
+    </a>
+</div>
+
+@if (!Model.Proposals.Any())
+{
+    <div class="card">
+        <div class="card-body empty-state">
+            <i class="bi bi-file-earmark-plus"></i>
+            <h5>No proposals yet</h5>
+            <p>Submit your first project proposal to be matched with a supervisor.</p>
+            <a asp-action="Submit" class="btn btn-primary mt-2">Submit a Proposal</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var p in Model.Proposals)
+        {
+            <div class="col-md-6">
+                <div class="card proposal-card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="badge @GetStatusBadge(p.Status)">@p.Status</span>
+                        <small class="text-muted">@p.SubmittedAt.ToString("dd MMM yyyy")</small>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-1">@p.Title</h6>
+                        <span class="badge bg-secondary mb-2">@p.ResearchArea</span>
+                        <p class="small text-muted mb-2">
+                            @(p.Abstract.Length > 150 ? p.Abstract.Substring(0, 150) + "…" : p.Abstract)
+                        </p>
+                        <div class="small text-muted">
+                            <i class="bi bi-stack me-1"></i>@p.TechnicalStack
+                        </div>
+
+                        @if (p.IdentityRevealed && p.SupervisorName != null)
+                        {
+                            <div class="alert alert-success py-2 mt-3 mb-0 reveal-badge">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i class="bi bi-eye-fill"></i>
+                                    <strong style="font-size:.82rem;">Identity Revealed</strong>
+                                </div>
+                                <div class="small">
+                                    <strong>Supervisor:</strong> @p.SupervisorName<br />
+                                    <strong>Email:</strong> <a href="mailto:@p.SupervisorEmail">@p.SupervisorEmail</a>
+                                </div>
+                            </div>
+                        }
+                        else if (p.Status == ProjectStatus.UnderReview)
+                        {
+                            <div class="alert alert-info py-2 mt-3 mb-0">
+                                <i class="bi bi-hourglass-split me-2"></i><small>A supervisor is reviewing your proposal.</small>
+                            </div>
+                        }
+                    </div>
+                    @if (p.Status != ProjectStatus.Matched && p.Status != ProjectStatus.Withdrawn)
+                    {
+                        <div class="card-footer d-flex gap-2">
+                            <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-pencil me-1"></i>Edit
+                            </a>
+                            <form asp-action="Withdraw" asp-route-id="@p.Id" method="post"
+                                  onsubmit="return confirm('Withdraw this proposal?')">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-x-circle me-1"></i>Withdraw
+                                </button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@functions {
+    string GetStatusBadge(ProjectStatus s) => s switch {
+        ProjectStatus.Pending     => "bg-warning",
+        ProjectStatus.UnderReview => "bg-info",
+        ProjectStatus.Matched     => "bg-success",
+        ProjectStatus.Withdrawn   => "bg-secondary",
+        _                         => "bg-secondary"
+    };
+}

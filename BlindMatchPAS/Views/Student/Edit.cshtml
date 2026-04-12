@@ -1,0 +1,55 @@
+@model SubmitProposalViewModel
+@{ ViewData["Title"] = "Edit Proposal"; }
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="mb-3">
+            <a asp-action="Dashboard" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+            </a>
+        </div>
+        <div class="card">
+            <div class="card-header bw-dark">
+                <i class="bi bi-pencil-square me-2"></i>Edit Proposal
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" asp-route-id="@ViewBag.ProposalId" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label">Project Title</label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ResearchAreaId" class="form-label">Research Area</label>
+                        <select asp-for="ResearchAreaId" class="form-select"
+                                asp-items="@(new SelectList(Model.ResearchAreas, "Id", "Name"))">
+                        </select>
+                        <span asp-validation-for="ResearchAreaId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="TechnicalStack" class="form-label">Technical Stack</label>
+                        <input asp-for="TechnicalStack" class="form-control" />
+                        <span asp-validation-for="TechnicalStack" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Abstract" class="form-label">Abstract</label>
+                        <textarea asp-for="Abstract" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="Abstract" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Save Changes
+                        </button>
+                        <a asp-action="Dashboard" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

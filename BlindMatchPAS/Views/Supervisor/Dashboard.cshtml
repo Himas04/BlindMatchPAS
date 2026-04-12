@@ -1,0 +1,180 @@
+@model SupervisorDashboardViewModel
+@{ ViewData["Title"] = "Supervisor Dashboard"; }
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="page-title"><i class="bi bi-person-workspace me-2" style="opacity:.4"></i>Supervisor Dashboard</h1>
+        <p class="page-subtitle">Review anonymous proposals and manage your matches</p>
+    </div>
+</div>
+
+<!-- Expertise Panel -->
+<div class="card mb-4">
+    <div class="card-header bw-dark">
+        <i class="bi bi-tags-fill me-2"></i>My Research Expertise
+    </div>
+    <div class="card-body">
+        <p class="small text-muted mb-3">Select the research areas you can supervise. Only matching proposals will appear below.</p>
+        <form asp-action="SaveExpertise" method="post">
+            <div class="row g-2">
+                @foreach (var area in Model.AllAreas)
+                {
+                    <div class="col-md-4">
+                        <label class="expertise-item">
+                            <input class="form-check-input flex-shrink-0" type="checkbox"
+                                   name="areaIds" value="@area.Id"
+                                   @(Model.SelectedAreaIds.Contains(area.Id) ? "checked" : "") />
+                            <div class="expertise-label">
+                                <div style="font-size:.85rem;font-weight:600;color:#1a1a1a">@area.Name</div>
+                                @if (area.Description != null)
+                                {
+                                    <div class="small text-muted">@area.Description</div>
+                                }
+                            </div>
+                        </label>
+                    </div>
+                }
+            </div>
+            <button type="submit" class="btn btn-primary mt-3 btn-sm">
+                <i class="bi bi-save me-1"></i>Save Preferences
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Blind Review Dashboard -->
+<div class="card mb-4">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-eye-slash-fill me-2"></i>Available Proposals</span>
+        <span class="badge bg-secondary">@Model.AvailableProposals.Count</span>
+    </div>
+    <div class="card-body @(!Model.AvailableProposals.Any() ? "p-0" : "")">
+        @if (!Model.AvailableProposals.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <h5>No proposals available</h5>
+                <p>No proposals match your expertise, or you've expressed interest in all current ones.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var p in Model.AvailableProposals)
+                {
+                    <div class="col-md-6">
+                        <div class="card blind-card h-100">
+                            <div class="card-header d-flex justify-content-between">
+                                <span class="badge bg-secondary">@p.ResearchArea</span>
+                                <span class="badge @(p.Status == ProjectStatus.UnderReview ? "bg-info" : "bg-warning")">@p.Status</span>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-2">@p.Title</h6>
+                                <p class="small text-muted mb-2">
+                                    @(p.Abstract.Length > 200 ? p.Abstract.Substring(0, 200) + "…" : p.Abstract)
+                                </p>
+                                <div class="small text-muted mb-2"><i class="bi bi-stack me-1"></i>@p.TechnicalStack</div>
+                                <div class="blind-tag">
+                                    <i class="bi bi-person-dash"></i> Student identity hidden
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <form asp-action="ExpressInterest" method="post">
+                                    <input type="hidden" name="projectId" value="@p.Id" />
+                                    <button type="submit" class="btn btn-outline-success btn-sm w-100">
+                                        <i class="bi bi-hand-thumbs-up me-1"></i>Express Interest
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<!-- My Matches -->
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-link-45deg me-2"></i>My Matches</span>
+        <span class="badge bg-secondary">@Model.MyMatches.Count</span>
+    </div>
+    @if (!Model.MyMatches.Any())
+    {
+        <div class="card-body">
+            <div class="empty-state py-4">
+                <i class="bi bi-people"></i>
+                <h5>No matches yet</h5>
+                <p>Express interest in proposals above to start matching.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Project</th>
+                            <th>Area</th>
+                            <th>Status</th>
+                            <th>Student</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var m in Model.MyMatches)
+                        {
+                            <tr>
+                                <td class="fw-semibold" style="max-width:180px">@m.ProjectTitle</td>
+                                <td><span class="badge bg-secondary">@m.ResearchArea</span></td>
+                                <td><span class="badge @GetMatchBadge(m.Status)">@m.Status</span></td>
+                                <td>
+                                    @if (m.IdentityRevealed)
+                                    {
+                                        <div>
+                                            <i class="bi bi-eye-fill me-1 text-success"></i>
+                                            <strong class="small">@m.StudentName</strong><br />
+                                            <a href="mailto:@m.StudentEmail" class="small text-muted">@m.StudentEmail</a>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="blind-tag"><i class="bi bi-eye-slash"></i> Hidden</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (m.Status == MatchStatus.Interested)
+                                    {
+                                        <form asp-action="ConfirmMatch" method="post">
+                                            <input type="hidden" name="matchId" value="@m.MatchId" />
+                                            <button type="submit" class="btn btn-primary btn-sm"
+                                                    onclick="return confirm('Confirm match and reveal identities?')">
+                                                <i class="bi bi-check-circle me-1"></i>Confirm & Reveal
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="small text-muted"><i class="bi bi-check2-circle me-1"></i>Confirmed</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@functions {
+    string GetMatchBadge(MatchStatus s) => s switch {
+        MatchStatus.Interested => "bg-warning",
+        MatchStatus.Confirmed  => "bg-success",
+        MatchStatus.Rejected   => "bg-danger",
+        _                      => "bg-secondary"
+    };
+}

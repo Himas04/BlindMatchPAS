@@ -1,0 +1,153 @@
+@model LoginViewModel
+@{ ViewData["Title"] = "Login"; Layout = null; }
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login — BlindMatch PAS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-wrapper { width: 100%; max-width: 420px; padding: 1rem; }
+        .auth-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+        }
+        .brand-mark {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 2rem;
+        }
+        .brand-icon {
+            width: 40px; height: 40px;
+            background: #0a0a0a;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.1rem;
+        }
+        .brand-name { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; color: #0a0a0a; }
+        .brand-sub  { font-size: 0.72rem; color: #9a9a9a; text-transform: uppercase; letter-spacing: 0.06em; }
+        .form-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #4a4a4a;
+            margin-bottom: 0.4rem;
+        }
+        .form-control {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            padding: 0.55rem 0.85rem;
+            background: #fafafa;
+            transition: all 0.15s;
+        }
+        .form-control:focus {
+            border-color: #0a0a0a;
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.07);
+            background: #fff;
+            outline: none;
+        }
+        .btn-login {
+            background: #0a0a0a;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.88rem;
+            padding: 0.65rem 1rem;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.15s;
+            letter-spacing: 0.01em;
+        }
+        .btn-login:hover { background: #1a1a1a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .divider { border: none; border-top: 1px solid #f0f0f0; margin: 1.5rem 0; }
+        .text-link { color: #0a0a0a; font-weight: 600; text-decoration: none; }
+        .text-link:hover { text-decoration: underline; }
+        .demo-box {
+            background: #f7f7f7;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 0.9rem;
+            font-size: 0.78rem;
+            color: #6b6b6b;
+            line-height: 1.7;
+        }
+        .demo-box strong { color: #1a1a1a; font-weight: 600; }
+        .demo-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; color: #9a9a9a; font-weight: 600; margin-bottom: 0.4rem; }
+        .alert-danger { border-radius: 8px; font-size: 0.83rem; background: #f9f9f9; border: 1px solid #ddd; border-left: 3px solid #6b6b6b; color: #333; }
+        .text-muted-sm { font-size: 0.8rem; color: #9a9a9a; text-align: center; }
+        .form-check-input:checked { background-color: #0a0a0a; border-color: #0a0a0a; }
+        .form-check-label { font-size: 0.83rem; color: #6b6b6b; }
+        .text-danger { color: #6b6b6b !important; font-size: 0.78rem; }
+    </style>
+</head>
+<body>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="brand-mark">
+            <div class="brand-icon"><i class="bi bi-eye-slash-fill"></i></div>
+            <div>
+                <div class="brand-name">BlindMatch PAS</div>
+                <div class="brand-sub">Project Approval System</div>
+            </div>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3 py-2"></div>
+        }
+
+        <form asp-action="Login" method="post">
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email Address</label>
+                <input asp-for="Email" class="form-control" placeholder="you@university.ac.lk" autocomplete="email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">Password</label>
+                <input asp-for="Password" class="form-control" placeholder="••••••••" autocomplete="current-password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="mb-4 form-check">
+                <input asp-for="RememberMe" class="form-check-input" />
+                <label asp-for="RememberMe" class="form-check-label">Stay signed in</label>
+            </div>
+            <button type="submit" class="btn-login">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+            </button>
+        </form>
+
+        <hr class="divider" />
+
+        <p class="text-muted-sm mb-3">
+            No account? <a asp-action="Register" class="text-link">Register here</a>
+        </p>
+
+        <div class="demo-box">
+            <div class="demo-label">Demo Credentials</div>
+            <div><strong>Admin:</strong> admin@blindmatch.ac.lk / Admin@1234</div>
+            <div><strong>Leader:</strong> moduleleader@blindmatch.ac.lk / Leader@1234</div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+@model AdminDashboardViewModel
+@{ ViewData["Title"] = "Module Leader Dashboard"; }
+
+<div class="mb-4">
+    <h1 class="page-title"><i class="bi bi-grid-3x3-gap-fill me-2" style="opacity:.4"></i>Module Leader Dashboard</h1>
+    <p class="page-subtitle">Allocation oversight and system management</p>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-primary">
+            <div class="stat-number">@Model.TotalProposals</div>
+            <div class="stat-label"><i class="bi bi-file-earmark-text me-1"></i>Total Proposals</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-warning">
+            <div class="stat-number">@Model.PendingProposals</div>
+            <div class="stat-label"><i class="bi bi-hourglass me-1"></i>Pending</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-info">
+            <div class="stat-number">@Model.TotalMatches</div>
+            <div class="stat-label"><i class="bi bi-link me-1"></i>Total Matches</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-success">
+            <div class="stat-number">@Model.ConfirmedMatches</div>
+            <div class="stat-label"><i class="bi bi-check-circle me-1"></i>Confirmed</div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-tabs mb-3" id="leaderTabs">
+    <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#matchesTab">
+            <i class="bi bi-people me-1"></i>All Matches
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#areasTab">
+            <i class="bi bi-tags me-1"></i>Research Areas
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#usersTab">
+            <i class="bi bi-people-fill me-1"></i>Users
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <!-- All Matches Tab -->
+    <div class="tab-pane fade show active" id="matchesTab">
+        <div class="card">
+            <div class="card-body p-0">
+                @if (!Model.AllMatches.Any())
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-people"></i>
+                        <h5>No matches yet</h5>
+                        <p>Matches will appear here once supervisors express interest in proposals.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Project</th>
+                                    <th>Student</th>
+                                    <th>Supervisor</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var m in Model.AllMatches)
+                                {
+                                    <tr>
+                                        <td class="text-muted small">@m.MatchId</td>
+                                        <td class="fw-semibold" style="max-width:160px">@m.ProjectTitle</td>
+                                        <td>
+                                            <div class="fw-semibold small">@m.StudentName</div>
+                                            <div class="text-muted" style="font-size:.75rem">@m.StudentEmail</div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold small">@m.SupervisorName</div>
+                                            <div class="text-muted" style="font-size:.75rem">@m.SupervisorEmail</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge @GetBadge(m.MatchStatus)">@m.MatchStatus</span>
+                                        </td>
+                                        <td class="small text-muted">@m.CreatedAt.ToString("dd MMM yyyy")</td>
+                                        <td>
+                                            <button class="btn btn-outline-warning btn-sm"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#reassignModal"
+                                                    data-matchid="@m.MatchId">
+                                                <i class="bi bi-arrow-left-right"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Research Areas Tab -->
+    <div class="tab-pane fade" id="areasTab">
+        <div class="card">
+            <div class="card-header bw-dark">
+                <i class="bi bi-tags me-2"></i>Manage Research Areas
+            </div>
+            <div class="card-body">
+                <form asp-action="AddResearchArea" method="post" class="mb-4">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Area Name</label>
+                            <input name="Name" class="form-control" placeholder="e.g., Quantum Computing" required />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Description</label>
+                            <input name="Description" class="form-control" placeholder="Brief description (optional)" />
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-plus me-1"></i>Add Area
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <div class="table-responsive">
+                    <table class="table table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var a in Model.ResearchAreas)
+                            {
+                                <tr>
+                                    <td class="fw-semibold small">@a.Name</td>
+                                    <td class="text-muted small">@a.Description</td>
+                                    <td>
+                                        <span class="badge @(a.IsActive ? "bg-success" : "bg-secondary")">
+                                            @(a.IsActive ? "Active" : "Inactive")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <form asp-action="ToggleResearchArea" asp-route-id="@a.Id" method="post">
+                                            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                                @(a.IsActive ? "Deactivate" : "Activate")
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Tab -->
+    <div class="tab-pane fade" id="usersTab">
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr><th>Name</th><th>Email</th><th>Role</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var u in Model.AllUsers)
+                            {
+                                <tr>
+                                    <td class="fw-semibold small">@u.FullName</td>
+                                    <td class="text-muted small">@u.Email</td>
+                                    <td><span class="badge @GetRoleBadge(u.Role)">@u.Role</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reassign Modal -->
+<div class="modal fade" id="reassignModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-arrow-left-right me-2"></i>Reassign Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="Reassign" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="matchId" id="reassignMatchId" />
+                    <div class="mb-3">
+                        <label class="form-label">New Supervisor</label>
+                        <select name="newSupervisorId" class="form-select">
+                            @foreach (var u in Model.AllUsers.Where(u => u.Role == "Supervisor"))
+                            {
+                                <option value="@u.Id">@u.FullName — @u.Email</option>
+                            }
+                        </select>
+                        @if (!Model.AllUsers.Any(u => u.Role == "Supervisor"))
+                        {
+                            <div class="form-text text-muted">No supervisors registered yet.</div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Reassign</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetBadge(MatchStatus s) => s switch {
+        MatchStatus.Interested => "bg-warning",
+        MatchStatus.Confirmed  => "bg-success",
+        MatchStatus.Rejected   => "bg-danger",
+        _                      => "bg-secondary"
+    };
+    string GetRoleBadge(string r) => r switch {
+        "Admin"        => "bg-dark",
+        "ModuleLeader" => "bg-primary",
+        "Supervisor"   => "bg-success",
+        "Student"      => "bg-secondary",
+        _              => "bg-secondary"
+    };
+}
+
+@section Scripts {
+    <script>
+        document.getElementById('reassignModal').addEventListener('show.bs.modal', function (e) {
+            var matchId = e.relatedTarget.getAttribute('data-matchid');
+            document.getElementById('reassignMatchId').value = matchId;
+        });
+    </script>
+}
