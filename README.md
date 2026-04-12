@@ -46,7 +46,7 @@ This creates the database with all tables and seeds:
 dotnet run
 ```
 
-Navigate to `https://localhost:5001`
+Navigate to `https://localhost:5000`
 
 ---
 
@@ -92,29 +92,6 @@ BlindMatchPAS.Tests/
 └── Integration/
     └── DatabaseIntegrationTests.cs # 5 integration tests
 ```
-
----
-
-## Git Workflow (for marks)
-
-Follow feature branching for good marks:
-
-```bash
-git checkout -b feature/student-module
-# ... work ...
-git commit -m "feat: implement student proposal submission with validation"
-
-git checkout -b feature/supervisor-blind-review
-git commit -m "feat: add blind review dashboard — student identity hidden"
-
-git checkout -b feature/identity-reveal
-git commit -m "feat: implement identity reveal on match confirmation"
-
-git checkout -b feature/testing
-git commit -m "test: add unit tests for BlindMatchService with 80%+ coverage"
-```
-
----
 
 ## User Roles
 
