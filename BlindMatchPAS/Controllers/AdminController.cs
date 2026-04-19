@@ -78,7 +78,11 @@ namespace BlindMatchPAS.Controllers
             if (user != null)
             {
                 await _userManager.DeleteAsync(user);
-                TempData["Success"] = "User deleted.";
+                TempData["Success"] = "User deleted successfully.";
+            }
+            else
+            {
+                TempData["Error"] = "User not found.";
             }
             return RedirectToAction("Dashboard");
         }
