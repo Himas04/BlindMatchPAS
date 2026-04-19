@@ -6,14 +6,31 @@ namespace BlindMatchPAS.Services
 {
     public interface IBlindMatchService
     {
+        /// <summary>Returns proposals visible to a supervisor based on their expertise areas, excluding already-reviewed projects.</summary>
         Task<List<ProjectProposal>> GetBlindProposalsForSupervisorAsync(string supervisorId);
+
+        /// <summary>Records a supervisor's interest in a project and moves it to UnderReview status.</summary>
         Task<bool> ExpressInterestAsync(string supervisorId, int projectId);
+
+        /// <summary>Confirms a match and triggers identity reveal for both student and supervisor.</summary>
         Task<bool> ConfirmMatchAsync(string supervisorId, int matchId);
+
+        /// <summary>Fetches a single match by ID including related proposal and user data.</summary>
         Task<Match?> GetMatchByIdAsync(int matchId);
+
+        /// <summary>Returns all matches assigned to the given supervisor.</summary>
         Task<List<Match>> GetSupervisorMatchesAsync(string supervisorId);
+
+        /// <summary>Returns all proposals submitted by the given student.</summary>
         Task<List<ProjectProposal>> GetStudentProposalsAsync(string studentId);
+
+        /// <summary>Fetches a single proposal by ID including research area and student info.</summary>
         Task<ProjectProposal?> GetProposalByIdAsync(int id);
+
+        /// <summary>Withdraws a proposal if it has not already been matched.</summary>
         Task<bool> WithdrawProposalAsync(string studentId, int proposalId);
+
+        /// <summary>Reassigns a matched project to a different supervisor, resetting the match to Interested status.</summary>
         Task<bool> ReassignProjectAsync(int matchId, string newSupervisorId);
     }
 
@@ -40,13 +57,13 @@ namespace BlindMatchPAS.Services
 
             // Only show Pending proposals — UnderReview means another supervisor
             // has already expressed interest, so it should not appear to others.
-            var query = _db.ProjectProposals
+            var pendingProposalsQuery = _db.ProjectProposals
                 .Include(p => p.ResearchArea)
                 .Where(p => p.Status == ProjectStatus.Pending);
 
             // Filter by expertise if supervisor has set preferences
             if (expertiseAreaIds.Any())
-                query = query.Where(p => expertiseAreaIds.Contains(p.ResearchAreaId));
+                pendingProposalsQuery = pendingProposalsQuery.Where(p => expertiseAreaIds.Contains(p.ResearchAreaId));
 
             // Exclude proposals where this supervisor already expressed interest
             var alreadyInterestedIds = await _db.Matches
@@ -54,7 +71,7 @@ namespace BlindMatchPAS.Services
                 .Select(m => m.ProjectProposalId)
                 .ToListAsync();
 
-            return await query
+            return await pendingProposalsQuery
                 .Where(p => !alreadyInterestedIds.Contains(p.Id))
                 .OrderByDescending(p => p.SubmittedAt)
                 .ToListAsync();
@@ -161,6 +178,7 @@ namespace BlindMatchPAS.Services
             var proposal = await _db.ProjectProposals
                 .FirstOrDefaultAsync(p => p.Id == proposalId && p.StudentId == studentId);
 
+            // Cannot withdraw if not found or already finalised via a match
             if (proposal == null || proposal.Status == ProjectStatus.Matched)
                 return false;
 
