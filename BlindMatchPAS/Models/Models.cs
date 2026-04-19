@@ -9,6 +9,7 @@ namespace BlindMatchPAS.Models
         [Required, MaxLength(100)]
         public string FullName { get; set; } = string.Empty;
 
+        /// <summary>Denotes the user's role in the system: Student, Supervisor, ModuleLeader, or Admin.</summary>
         public string Role { get; set; } = string.Empty; // Student | Supervisor | ModuleLeader | Admin
     }
 
