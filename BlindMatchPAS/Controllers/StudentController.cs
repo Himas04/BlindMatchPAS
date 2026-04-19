@@ -83,7 +83,7 @@ namespace BlindMatchPAS.Controllers
             _db.ProjectProposals.Add(proposal);
             await _db.SaveChangesAsync();
 
-            TempData["Success"] = "Proposal submitted successfully!";
+            TempData["Success"] = "Your proposal has been submitted and is pending review.";
             return RedirectToAction("Dashboard");
         }
 
@@ -133,7 +133,7 @@ namespace BlindMatchPAS.Controllers
             proposal.UpdatedAt = DateTime.UtcNow;
             await _db.SaveChangesAsync();
 
-            TempData["Success"] = "Proposal updated successfully!";
+            TempData["Success"] = "Your proposal has been updated successfully.";
             return RedirectToAction("Dashboard");
         }
 
